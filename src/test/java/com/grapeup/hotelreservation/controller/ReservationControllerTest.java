@@ -170,4 +170,11 @@ public class ReservationControllerTest {
                 .content(TestUtils.asJsonString(putReservation)))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @DisplayName("DELETE /reservations/1 - Success")
+    void shouldDeleteReservation() throws Exception {
+        mockMvc.perform(delete("/reservations/{id}", 1))
+                .andExpect(status().isOk());
+    }
 }
