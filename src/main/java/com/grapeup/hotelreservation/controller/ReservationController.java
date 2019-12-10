@@ -5,6 +5,8 @@ import com.grapeup.hotelreservation.service.ReservationService;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -50,5 +52,33 @@ public class ReservationController {
         } catch (URISyntaxException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @PutMapping("/reservations/{id}")
+    public ResponseEntity<?> updateReservation(@RequestBody Reservation reservation,
+                                           @PathVariable Long id) {
+
+        Optional<Reservation> existingReservation = reservationService.findById(id);
+
+        return existingReservation.map(r -> {
+            r.setUsername(reservation.getUsername());
+            r.setNumberOfPeople(reservation.getNumberOfPeople());
+            r.setStartDate(reservation.getStartDate());
+            r.setEndDate(reservation.getEndDate());
+            r.setRoomId(reservation.getRoomId());
+
+            try {
+                if (reservationService.update(r)) {
+                    return ResponseEntity.ok()
+                            .location(new URI("/reservations/" + r.getId()))
+                            .body(r);
+                } else {
+                    return ResponseEntity.notFound().build();
+                }
+            } catch (URISyntaxException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+
+        }).orElse(ResponseEntity.notFound().build());
     }
 }

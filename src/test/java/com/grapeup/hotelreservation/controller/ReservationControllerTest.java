@@ -27,8 +27,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(SpringExtension.class)
@@ -133,4 +132,42 @@ public class ReservationControllerTest {
                 .andExpect(jsonPath("$.roomId", is(mockReservation.getRoomId().intValue())));
     }
 
+    @Test
+    @DisplayName("PUT /reservations/1 - Success")
+    void shouldUpdateReservation() throws Exception {
+        Reservation putReservation = Reservation.builder().username("test")
+                .numberOfPeople(3).startDate(LocalDate.of(2020, 8, 1))
+                .endDate(LocalDate.of(2020, 9, 1))
+                .roomId(1L).build();
+        doReturn(Optional.of(mockReservation)).when(reservationService).findById(1L);
+        doReturn(true).when(reservationService).update(any());
+
+        mockMvc.perform(put("/reservations/{id}", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(TestUtils.asJsonString(putReservation)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(header().string(HttpHeaders.LOCATION, "/reservations/1"))
+                .andExpect(jsonPath("$.id", is(mockReservation.getId().intValue())))
+                .andExpect(jsonPath("$.username", is(mockReservation.getUsername())))
+                .andExpect(jsonPath("$.numberOfPeople", is(mockReservation.getNumberOfPeople())))
+                .andExpect(jsonPath("$.startDate", is(mockReservation.getStartDate().toString())))
+                .andExpect(jsonPath("$.endDate", is(mockReservation.getEndDate().toString())))
+                .andExpect(jsonPath("$.roomId", is(mockReservation.getRoomId().intValue())));
+    }
+
+    @Test
+    @DisplayName("PUT /reservations/1 - Not Found")
+    void shouldNotUpdateReservationWhenNotExist() throws Exception {
+        Reservation putReservation = Reservation.builder().username("test")
+                .numberOfPeople(3).startDate(LocalDate.of(2020, 8, 1))
+                .endDate(LocalDate.of(2020, 9, 1))
+                .roomId(1L).build();
+        doReturn(Optional.empty()).when(reservationService).findById(1L);
+
+        mockMvc.perform(put("/reservations/{id}", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(TestUtils.asJsonString(putReservation)))
+                .andExpect(status().isNotFound());
+    }
 }
