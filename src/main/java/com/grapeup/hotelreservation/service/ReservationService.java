@@ -10,5 +10,6 @@ public interface ReservationService {
     Optional<Reservation> findById(Long id);
     Reservation save(Reservation reservation);
     Optional<Reservation> update(Reservation reservation);
+    void delete(Long id);
 
 }
