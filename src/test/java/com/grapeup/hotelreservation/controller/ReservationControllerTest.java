@@ -1,5 +1,9 @@
 package com.grapeup.hotelreservation.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.grapeup.hotelreservation.TestUtils;
 import com.grapeup.hotelreservation.model.Reservation;
 import com.grapeup.hotelreservation.service.ReservationService;
 import java.time.LocalDate;
@@ -20,9 +24,11 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(SpringExtension.class)
@@ -102,4 +108,29 @@ public class ReservationControllerTest {
         mockMvc.perform(get("/reservations/{id}", 1))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @DisplayName("POST /reservations - Success")
+    void shouldCreateReservation() throws Exception {
+        Reservation postReservation = Reservation.builder().username("test")
+                .numberOfPeople(3).startDate(LocalDate.of(2020, 8, 1))
+                .endDate(LocalDate.of(2020, 9, 1))
+                .roomId(1L).build();
+
+        doReturn(mockReservation).when(reservationService).save(any());
+
+        mockMvc.perform(post("/reservations")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(TestUtils.asJsonString(postReservation)))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(header().string(HttpHeaders.LOCATION, "/reservations/1"))
+                .andExpect(jsonPath("$.id", is(mockReservation.getId().intValue())))
+                .andExpect(jsonPath("$.username", is(mockReservation.getUsername())))
+                .andExpect(jsonPath("$.numberOfPeople", is(mockReservation.getNumberOfPeople())))
+                .andExpect(jsonPath("$.startDate", is(mockReservation.getStartDate().toString())))
+                .andExpect(jsonPath("$.endDate", is(mockReservation.getEndDate().toString())))
+                .andExpect(jsonPath("$.roomId", is(mockReservation.getRoomId().intValue())));
+    }
+
 }
