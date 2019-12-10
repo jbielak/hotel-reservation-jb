@@ -8,11 +8,14 @@ import com.grapeup.hotelreservation.model.Reservation;
 import com.grapeup.hotelreservation.service.ReservationService;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.internal.util.collections.ListUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -176,5 +179,38 @@ public class ReservationControllerTest {
     void shouldDeleteReservation() throws Exception {
         mockMvc.perform(delete("/reservations/{id}", 1))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("GET /reservations?roomNumber=5 - Success - empty list")
+    void shouldReturnEmptyListWhenNoReservationsForRoom() throws Exception {
+        doReturn(Collections.emptyList()).when(reservationService).findForRoom(5L);
+
+        mockMvc.perform(get("/reservations?roomId={roomId}", 5))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(0)));
+    }
+
+    @Test
+    @DisplayName("GET /reservations?roomNumber=1 - Success")
+    void shouldReturnReservationsForRoom() throws Exception {
+        Reservation reservation2 = Reservation.builder().id(2L).username("tester")
+                .numberOfPeople(3).startDate(LocalDate.of(2020, 7, 1))
+                .endDate(LocalDate.of(2020, 4, 7))
+                .roomId(1L).build();
+
+        doReturn(Arrays.asList(mockReservation, reservation2)).when(reservationService).findForRoom(1L);
+
+        mockMvc.perform(get("/reservations?roomId={roomId}", 1l))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].id", is(mockReservation.getId().intValue())))
+                .andExpect(jsonPath("$[0].username", is(mockReservation.getUsername())))
+                .andExpect(jsonPath("$[0].numberOfPeople", is(mockReservation.getNumberOfPeople())))
+                .andExpect(jsonPath("$[0].startDate", is(mockReservation.getStartDate().toString())))
+                .andExpect(jsonPath("$[0].endDate", is(mockReservation.getEndDate().toString())))
+                .andExpect(jsonPath("$[0].roomId", is(mockReservation.getRoomId().intValue())));
     }
 }
