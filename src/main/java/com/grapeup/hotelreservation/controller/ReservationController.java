@@ -81,4 +81,18 @@ public class ReservationController {
 
         }).orElse(ResponseEntity.notFound().build());
     }
+
+    @DeleteMapping("/reservations/{id}")
+    public ResponseEntity<?> deleteReservation(@PathVariable Long id) {
+
+        Optional<Reservation> existingReservation = reservationService.findById(id);
+
+        return existingReservation.map(p -> {
+            if (reservationService.delete(p.getId())) {
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        }).orElse(ResponseEntity.notFound().build());
+    }
 }
