@@ -7,9 +7,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class ReservationController {
@@ -40,5 +38,17 @@ public class ReservationController {
                     }
                 })
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/reservations")
+    public ResponseEntity<Reservation> createReservation(@RequestBody Reservation reservation) {
+        Reservation newReservation = reservationService.save(reservation);
+        try {
+            return ResponseEntity
+                    .created(new URI("/reservations/" + newReservation.getId()))
+                    .body(newReservation);
+        } catch (URISyntaxException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }
