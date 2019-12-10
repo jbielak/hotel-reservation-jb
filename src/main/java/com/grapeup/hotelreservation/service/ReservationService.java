@@ -9,4 +9,6 @@ public interface ReservationService {
     List<Reservation> findAll();
     Optional<Reservation> findById(Long id);
     Reservation save(Reservation reservation);
+    Optional<Reservation> update(Reservation reservation);
+
 }
