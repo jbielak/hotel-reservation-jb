@@ -2,10 +2,6 @@ package com.grapeup.hotelreservation.controller;
 
 import com.grapeup.hotelreservation.model.Reservation;
 import com.grapeup.hotelreservation.service.ReservationService;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,6 +13,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/reservations")
@@ -55,7 +57,7 @@ public class ReservationController {
     }
 
     @PostMapping()
-    public ResponseEntity<Reservation> createReservation(@RequestBody Reservation reservation) {
+    public ResponseEntity<Reservation> createReservation(@RequestBody @Valid Reservation reservation) {
         Reservation newReservation = reservationService.save(reservation);
         try {
             return ResponseEntity
@@ -67,7 +69,7 @@ public class ReservationController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateReservation(@RequestBody Reservation reservation,
+    public ResponseEntity<?> updateReservation(@RequestBody @Valid Reservation reservation,
                                            @PathVariable Long id) {
 
         Optional<Reservation> existingReservation = reservationService.findById(id);
