@@ -1,21 +1,12 @@
 package com.grapeup.hotelreservation.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.grapeup.hotelreservation.TestUtils;
 import com.grapeup.hotelreservation.model.Reservation;
 import com.grapeup.hotelreservation.service.ReservationService;
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.internal.util.collections.ListUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,6 +15,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -136,6 +132,54 @@ public class ReservationControllerTest {
     }
 
     @Test
+    @DisplayName("POST /reservations - Bad Request - start date in the past")
+    void shouldReturnBadRequestWhenCreatingReservationWithStartDateInThePast() throws Exception {
+        Reservation postReservation = Reservation.builder().username("test")
+                .numberOfPeople(3).startDate(LocalDate.of(2018, 8, 1))
+                .endDate(LocalDate.of(2023, 9, 1)).build();
+
+        doReturn(mockReservation).when(reservationService).save(any());
+
+        mockMvc.perform(post("/reservations")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(TestUtils.asJsonString(postReservation)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
+
+    @Test
+    @DisplayName("POST /reservations - Bad Request - end date in the past")
+    void shouldReturnBadRequestWhenCreatingReservationWithEndDateInThePast() throws Exception {
+        Reservation postReservation = Reservation.builder().username("test")
+                .numberOfPeople(3).startDate(LocalDate.of(2023, 8, 1))
+                .endDate(LocalDate.of(2018, 9, 1)).build();
+
+        doReturn(mockReservation).when(reservationService).save(any());
+
+        mockMvc.perform(post("/reservations")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(TestUtils.asJsonString(postReservation)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
+
+    @Test
+    @DisplayName("POST /reservations - Bad Request - end date before start date")
+    void shouldReturnBadRequestWhenCreatingReservationWithEndDateBeforeStartDate() throws Exception {
+        Reservation postReservation = Reservation.builder().username("test")
+                .numberOfPeople(3).startDate(LocalDate.of(2024, 9, 1))
+                .endDate(LocalDate.of(2024, 8, 1)).build();
+
+        doReturn(mockReservation).when(reservationService).save(any());
+
+        mockMvc.perform(post("/reservations")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(TestUtils.asJsonString(postReservation)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
+
+    @Test
     @DisplayName("PUT /reservations/1 - Success")
     void shouldUpdateReservation() throws Exception {
         Reservation putReservation = Reservation.builder().username("test")
@@ -157,6 +201,57 @@ public class ReservationControllerTest {
                 .andExpect(jsonPath("$.startDate", is(mockReservation.getStartDate().toString())))
                 .andExpect(jsonPath("$.endDate", is(mockReservation.getEndDate().toString())))
                 .andExpect(jsonPath("$.roomId", is(mockReservation.getRoomId().intValue())));
+    }
+
+    @Test
+    @DisplayName("PUT /reservations/1 - Bad Request - start date in the past")
+    void shouldReturnBadRequestWhenUpdatingReservationWithStartDateInThePast() throws Exception {
+        Reservation putReservation = Reservation.builder().username("test")
+                .numberOfPeople(3).startDate(LocalDate.of(2018, 8, 1))
+                .endDate(LocalDate.of(2023, 9, 1))
+                .roomId(1L).build();
+        doReturn(Optional.of(mockReservation)).when(reservationService).findById(1L);
+        doReturn(Optional.of(mockReservation)).when(reservationService).update(any());
+
+        mockMvc.perform(put("/reservations/{id}", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(TestUtils.asJsonString(putReservation)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
+
+    @Test
+    @DisplayName("PUT /reservations/1 - Bad Request - end date in the past")
+    void shouldReturnBadRequestWhenUpdatingReservationWithEndDateInThePast() throws Exception {
+        Reservation putReservation = Reservation.builder().username("test")
+                .numberOfPeople(3).startDate(LocalDate.of(2023, 8, 1))
+                .endDate(LocalDate.of(2018, 9, 1))
+                .roomId(1L).build();
+        doReturn(Optional.of(mockReservation)).when(reservationService).findById(1L);
+        doReturn(Optional.of(mockReservation)).when(reservationService).update(any());
+
+        mockMvc.perform(put("/reservations/{id}", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(TestUtils.asJsonString(putReservation)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
+
+    @Test
+    @DisplayName("PUT /reservations/1 - Bad Request - end date before start")
+    void shouldReturnBadRequestWhenUpdatingReservationWithEndDateBeforeStartDate() throws Exception {
+        Reservation putReservation = Reservation.builder().username("test")
+                .numberOfPeople(3).startDate(LocalDate.of(2024, 9, 1))
+                .endDate(LocalDate.of(2024, 8, 1))
+                .roomId(1L).build();
+        doReturn(Optional.of(mockReservation)).when(reservationService).findById(1L);
+        doReturn(Optional.of(mockReservation)).when(reservationService).update(any());
+
+        mockMvc.perform(put("/reservations/{id}", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(TestUtils.asJsonString(putReservation)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 
     @Test
