@@ -1,5 +1,6 @@
 package com.grapeup.hotelreservation.service;
 
+import com.grapeup.hotelreservation.exception.AvailableRoomNotFoundException;
 import com.grapeup.hotelreservation.model.Reservation;
 import com.grapeup.hotelreservation.repository.ReservationRepository;
 import org.junit.jupiter.api.BeforeAll;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -20,7 +22,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -29,6 +33,9 @@ public class ReservationServiceTest {
 
     @MockBean
     private ReservationRepository reservationRepository;
+
+    @MockBean
+    private RoomService roomService;
 
     @Autowired
     private ReservationService reservationService;
@@ -95,6 +102,44 @@ public class ReservationServiceTest {
         Optional<Reservation> reservation = reservationService.findById(20L);
 
         assertThat(reservation.isEmpty(), is(true));
+    }
+
+    @Test
+    public void shouldSaveReservationThenReturnReservationWithAssignedIdAndRoom() {
+        Reservation reservationToSave = Reservation.builder().username("test")
+                .numberOfPeople(3).startDate(LocalDate.of(2020, 8, 1))
+                .endDate(LocalDate.of(2020, 9, 1)).build();
+
+        when(roomService.assignRoom(reservationToSave)).thenReturn(Optional.of(1L));
+
+        doAnswer(invocation -> {
+            ReflectionTestUtils.setField((Reservation) invocation.getArgument(0), "id", 1L);
+            return reservationToSave;
+        }).when(reservationRepository).save(reservationToSave);
+
+        Reservation savedReservation = reservationService.save(reservationToSave);
+
+        assertThat(savedReservation, is(notNullValue()));
+        assertThat(savedReservation.getId(), is(1L));
+        assertThat(savedReservation.getId(), is(notNullValue()));
+        assertThat(savedReservation.getRoomId(), is(notNullValue()));
+        assertThat(savedReservation.getRoomId(), is(1L));
+        assertThat(savedReservation.getUsername(), is(reservationToSave.getUsername()));
+        assertThat(savedReservation.getNumberOfPeople(), is(reservationToSave.getNumberOfPeople()));
+        assertThat(savedReservation.getStartDate(), is(reservationToSave.getStartDate()));
+        assertThat(savedReservation.getEndDate(), is(reservationToSave.getEndDate()));
+    }
+
+    @Test
+    public void shouldThrowNoAvailableRoomExceptionWhenNoAvailableRoom() {
+        Reservation reservationToSave = Reservation.builder().username("test")
+                .numberOfPeople(3).startDate(LocalDate.of(2020, 8, 1))
+                .endDate(LocalDate.of(2020, 9, 1)).build();
+
+        when(roomService.assignRoom(reservationToSave)).thenReturn(Optional.empty());
+
+        assertThrows(AvailableRoomNotFoundException.class, () ->
+                reservationService.save(reservationToSave));
     }
 
 }

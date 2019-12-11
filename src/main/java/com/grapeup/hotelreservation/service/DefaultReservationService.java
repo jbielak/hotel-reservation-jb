@@ -1,5 +1,6 @@
 package com.grapeup.hotelreservation.service;
 
+import com.grapeup.hotelreservation.exception.AvailableRoomNotFoundException;
 import com.grapeup.hotelreservation.model.Reservation;
 import com.grapeup.hotelreservation.repository.ReservationRepository;
 import org.springframework.stereotype.Service;
@@ -12,8 +13,12 @@ public class DefaultReservationService  implements ReservationService {
 
     private ReservationRepository reservationRepository;
 
-    public DefaultReservationService(ReservationRepository reservationRepository) {
+    private RoomService roomService;
+
+    public DefaultReservationService(ReservationRepository reservationRepository,
+                                     RoomService roomService) {
         this.reservationRepository = reservationRepository;
+        this.roomService = roomService;
     }
 
     @Override
@@ -28,7 +33,14 @@ public class DefaultReservationService  implements ReservationService {
 
     @Override
     public Reservation save(Reservation reservation) {
-        return null;
+
+        Optional<Long> availableRoom = roomService.assignRoom(reservation);
+        if (availableRoom.isPresent()) {
+            reservation.setRoomId(availableRoom.get());
+        } else {
+            throw new AvailableRoomNotFoundException();
+        }
+        return reservationRepository.save(reservation);
     }
 
     @Override
