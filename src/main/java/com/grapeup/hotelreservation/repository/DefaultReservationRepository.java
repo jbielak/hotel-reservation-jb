@@ -18,4 +18,9 @@ public class DefaultReservationRepository implements ReservationRepository {
     public Optional<Reservation> findById(Long id) {
         return null;
     }
+
+    @Override
+    public Reservation save(Reservation reservation) {
+        return null;
+    }
 }
