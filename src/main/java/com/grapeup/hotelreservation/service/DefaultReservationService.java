@@ -23,7 +23,7 @@ public class DefaultReservationService  implements ReservationService {
 
     @Override
     public Optional<Reservation> findById(Long id) {
-        return Optional.empty();
+        return reservationRepository.findById(id);
     }
 
     @Override
