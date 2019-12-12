@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -31,5 +32,25 @@ public class ReservationRepositoryTest {
         assertThat(reservations.get(0).getStartDate().toString(), is("2019-12-14"));
         assertThat(reservations.get(0).getEndDate().toString(), is("2019-12-20"));
         assertThat(reservations.get(0).getRoomId(), is(1L));
+    }
+
+    @Test
+    public void shouldFindByIdWhenReservationPresentInDatabase() {
+        Optional<Reservation> reservation = reservationRepository.findById(1L);
+
+        assertThat(reservation.isPresent(), is(true));
+        assertThat(reservation.get().getId(), is(1L) );
+        assertThat(reservation.get().getUsername(), is("test_user") );
+        assertThat(reservation.get().getNumberOfPeople(), is(6) );
+        assertThat(reservation.get().getStartDate().toString(), is("2019-12-14"));
+        assertThat(reservation.get().getEndDate().toString(), is("2019-12-20"));
+        assertThat(reservation.get().getRoomId(), is(1L));
+    }
+
+    @Test
+    public void shouldNotFindByIdWhenReservationIsNotPresentInDatabase() {
+        Optional<Reservation> reservation = reservationRepository.findById(3L);
+
+        assertThat(reservation.isPresent(), is(false));
     }
 }
