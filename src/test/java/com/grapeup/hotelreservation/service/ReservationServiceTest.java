@@ -186,4 +186,28 @@ public class ReservationServiceTest {
         verify(reservationRepository, times(1)).deleteById(any());
     }
 
+    @Test
+    public void shouldReturnEmptyListOfReservationsForRoomWithNoReservations() {
+        when(reservationRepository.findForRoom(anyLong())).thenReturn(Collections.EMPTY_LIST);
+
+        List<Reservation> reservations = reservationService.findForRoom(1L);
+
+        assertThat(reservations, is(notNullValue()));
+        assertThat(reservations, hasSize(0));
+    }
+
+
+    @Test
+    public void shouldReturnEListOfReservationsForRoom() {
+        Reservation reservation2 = Reservation.builder().id(2L).username("test")
+                .numberOfPeople(3).startDate(LocalDate.of(2020, 8, 1))
+                .endDate(LocalDate.of(2021, 9, 1))
+                .roomId(1L).build();
+        when(reservationRepository.findForRoom(anyLong())).thenReturn(Arrays.asList(mockReservation, reservation2));
+
+        List<Reservation> reservations = reservationService.findForRoom(1L);
+
+        assertThat(reservations, is(notNullValue()));
+        assertThat(reservations, hasSize(2));
+    }
 }

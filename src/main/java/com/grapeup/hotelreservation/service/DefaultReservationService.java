@@ -62,6 +62,6 @@ public class DefaultReservationService  implements ReservationService {
 
     @Override
     public List<Reservation> findForRoom(Long roomId) {
-        return null;
+        return reservationRepository.findForRoom(roomId);
     }
 }

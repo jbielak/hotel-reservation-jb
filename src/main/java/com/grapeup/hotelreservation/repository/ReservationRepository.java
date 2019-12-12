@@ -11,4 +11,5 @@ public interface ReservationRepository {
     Optional<Reservation> findById(Long id);
     Reservation save(Reservation reservation);
     void deleteById(Long id);
+    List<Reservation> findForRoom(Long roomId);
 }
