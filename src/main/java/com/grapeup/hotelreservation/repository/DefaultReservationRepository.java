@@ -28,4 +28,9 @@ public class DefaultReservationRepository implements ReservationRepository {
     public void deleteById(Long id) {
 
     }
+
+    @Override
+    public List<Reservation> findForRoom(Long roomId) {
+        return null;
+    }
 }
