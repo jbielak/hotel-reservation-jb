@@ -5,6 +5,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -12,18 +21,26 @@ import java.util.Objects;
 @Setter
 @Builder
 @NoArgsConstructor
+@Entity
+@Table(name = "reservation")
 public class Reservation {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String username;
 
+    @Column(name ="number_of_people")
     private int numberOfPeople;
 
+    @Column(name ="start_date")
     private LocalDate startDate;
 
+    @Column(name ="end_date")
     private LocalDate endDate;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.ALL)
     private Room room;
 
     public Reservation(Long id, String username, int numberOfPeople,
