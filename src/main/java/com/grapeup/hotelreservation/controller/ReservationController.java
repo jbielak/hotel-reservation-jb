@@ -1,5 +1,7 @@
 package com.grapeup.hotelreservation.controller;
 
+import com.grapeup.hotelreservation.converter.ReservationConverter;
+import com.grapeup.hotelreservation.dto.ReservationDto;
 import com.grapeup.hotelreservation.model.Reservation;
 import com.grapeup.hotelreservation.service.ReservationService;
 import org.springframework.http.HttpStatus;
@@ -19,24 +21,29 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
 
     private static final String RESERVATIONS_MAPPING = "/reservations/";
-    private ReservationService reservationService;
+    private final ReservationService reservationService;
 
     public ReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
     }
 
     @GetMapping()
-    public List<Reservation> getReservations(@RequestParam(required = false) Long roomId) {
+    public List<ReservationDto> getReservations(@RequestParam(required = false) Long roomId) {
         if (roomId != null) {
-            return reservationService.findForRoom(roomId);
+            return reservationService.findForRoom(roomId).stream()
+                    .map(ReservationConverter::toDto)
+                    .collect(Collectors.toList());
         }
-        return reservationService.findAll();
+        return reservationService.findAll().stream()
+                .map(ReservationConverter::toDto)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
@@ -48,7 +55,7 @@ public class ReservationController {
                         return ResponseEntity
                                 .ok()
                                 .location(new URI(RESERVATIONS_MAPPING + reservation.getId()))
-                                .body(reservation);
+                                .body(ReservationConverter.toDto(reservation));
                     } catch (URISyntaxException e ) {
                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
                     }
@@ -57,19 +64,19 @@ public class ReservationController {
     }
 
     @PostMapping()
-    public ResponseEntity<Reservation> createReservation(@RequestBody @Valid Reservation reservation) {
-        Reservation newReservation = reservationService.save(reservation);
+    public ResponseEntity<ReservationDto> createReservation(@RequestBody @Valid ReservationDto reservation) {
+        Reservation newReservation = reservationService.save(ReservationConverter.toEntity(reservation));
         try {
             return ResponseEntity
                     .created(new URI(RESERVATIONS_MAPPING + newReservation.getId()))
-                    .body(newReservation);
+                    .body(ReservationConverter.toDto(newReservation));
         } catch (URISyntaxException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateReservation(@RequestBody @Valid Reservation reservation,
+    public ResponseEntity<?> updateReservation(@RequestBody @Valid ReservationDto reservation,
                                            @PathVariable Long id) {
 
         Optional<Reservation> existingReservation = reservationService.findById(id);
@@ -85,7 +92,7 @@ public class ReservationController {
                 if (reservationService.update(r).isPresent()) {
                     return ResponseEntity.ok()
                             .location(new URI(RESERVATIONS_MAPPING + r.getId()))
-                            .body(r);
+                            .body(ReservationConverter.toDto(r));
                 } else {
                     return ResponseEntity.notFound().build();
                 }

@@ -1,17 +1,16 @@
 package com.grapeup.hotelreservation.model;
 
-import com.grapeup.hotelreservation.validator.StartDateBeforeEnd;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.validation.constraints.Future;
 import java.time.LocalDate;
 
 @Getter
 @Setter
 @Builder
-@StartDateBeforeEnd
+@NoArgsConstructor
 public class Reservation {
 
     private Long id;
@@ -20,12 +19,19 @@ public class Reservation {
 
     private int numberOfPeople;
 
-    @Future
     private LocalDate startDate;
 
-    @Future
     private LocalDate endDate;
 
     private Long roomId;
 
+    public Reservation(Long id, String username, int numberOfPeople,
+                       LocalDate startDate, LocalDate endDate, Long roomId) {
+        this.id = id;
+        this.username = username;
+        this.numberOfPeople = numberOfPeople;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.roomId = roomId;
+    }
 }

@@ -112,8 +112,7 @@ public class ReservationControllerTest {
     void shouldCreateReservation() throws Exception {
         Reservation postReservation = Reservation.builder().username("test")
                 .numberOfPeople(3).startDate(LocalDate.of(2020, 8, 1))
-                .endDate(LocalDate.of(2020, 9, 1))
-                .roomId(1L).build();
+                .endDate(LocalDate.of(2020, 9, 1)).build();
 
         doReturn(mockReservation).when(reservationService).save(any());
 
