@@ -45,12 +45,19 @@ public class DefaultReservationService  implements ReservationService {
 
     @Override
     public Optional<Reservation> update(Reservation reservation) {
-        return Optional.empty();
+        Optional<Long> availableRoom = roomService.reassignRoom(reservation);
+
+        if (availableRoom.isPresent()) {
+            reservation.setRoomId(availableRoom.get());
+        } else {
+            throw new AvailableRoomNotFoundException();
+        }
+        return Optional.of(reservationRepository.save(reservation));
     }
 
     @Override
     public void delete(Long id) {
-
+        reservationRepository.deleteById(id);
     }
 
     @Override

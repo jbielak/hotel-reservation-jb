@@ -6,4 +6,5 @@ import java.util.Optional;
 public interface RoomService {
 
     Optional<Long> assignRoom(Reservation reservation);
+    Optional<Long> reassignRoom(Reservation reservation);
 }

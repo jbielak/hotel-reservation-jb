@@ -132,7 +132,7 @@ public class ReservationControllerTest {
 
     @Test
     @DisplayName("POST /reservations - Bad Request")
-    void shouldReturnBadRequestWhenNoAvailableRoomForReservation() throws Exception {
+    void shouldReturnBadRequestWhenNoAvailableRoomForNewReservation() throws Exception {
         Reservation postReservation = Reservation.builder().username("test")
                 .numberOfPeople(3).startDate(LocalDate.of(2020, 8, 1))
                 .endDate(LocalDate.of(2020, 9, 1))
@@ -216,6 +216,22 @@ public class ReservationControllerTest {
                 .andExpect(jsonPath("$.startDate", is(mockReservation.getStartDate().toString())))
                 .andExpect(jsonPath("$.endDate", is(mockReservation.getEndDate().toString())))
                 .andExpect(jsonPath("$.roomId", is(mockReservation.getRoomId().intValue())));
+    }
+
+    @Test
+    @DisplayName("PUT /reservations/1 - Bad Request - not available room")
+    void shouldReturnBadRequestWhenNoAvailableRoomForUpdatedReservation() throws Exception {
+        Reservation putReservation = Reservation.builder().id(1L).username("test")
+                .numberOfPeople(5).startDate(LocalDate.of(2020, 8, 1))
+                .endDate(LocalDate.of(2020, 9, 1))
+                .roomId(1L).build();
+
+        doThrow(new AvailableRoomNotFoundException()).when(reservationService).save(any());
+
+        mockMvc.perform(put("/reservations/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(TestUtils.asJsonString(putReservation)))
+                .andExpect(status().isNotFound());
     }
 
     @Test

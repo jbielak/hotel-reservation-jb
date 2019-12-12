@@ -86,7 +86,6 @@ public class ReservationController {
             r.setNumberOfPeople(reservation.getNumberOfPeople());
             r.setStartDate(reservation.getStartDate());
             r.setEndDate(reservation.getEndDate());
-            r.setRoomId(reservation.getRoomId());
 
             try {
                 if (reservationService.update(r).isPresent()) {

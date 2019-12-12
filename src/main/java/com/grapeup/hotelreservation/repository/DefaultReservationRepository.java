@@ -23,4 +23,9 @@ public class DefaultReservationRepository implements ReservationRepository {
     public Reservation save(Reservation reservation) {
         return null;
     }
+
+    @Override
+    public void deleteById(Long id) {
+
+    }
 }
