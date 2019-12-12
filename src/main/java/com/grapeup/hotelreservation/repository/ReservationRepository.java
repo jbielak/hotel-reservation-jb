@@ -1,15 +1,18 @@
 package com.grapeup.hotelreservation.repository;
 
 import com.grapeup.hotelreservation.model.Reservation;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
-public interface ReservationRepository {
+@Repository
+public interface ReservationRepository extends CrudRepository<Reservation, Long>  {
 
     List<Reservation> findAll();
-    Optional<Reservation> findById(Long id);
-    Reservation save(Reservation reservation);
-    void deleteById(Long id);
-    List<Reservation> findForRoom(Long roomId);
+
+    @Query("SELECT r FROM Reservation r WHERE r.roomId = :roomId")
+    List<Reservation> findForRoom(@Param("roomId") Long roomId);
 }
