@@ -23,8 +23,11 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -131,7 +134,7 @@ public class ReservationServiceTest {
     }
 
     @Test
-    public void shouldThrowNoAvailableRoomExceptionWhenNoAvailableRoom() {
+    public void shouldThrowNoAvailableRoomExceptionWhenNoAvailableRoomForNewReservation() {
         Reservation reservationToSave = Reservation.builder().username("test")
                 .numberOfPeople(3).startDate(LocalDate.of(2020, 8, 1))
                 .endDate(LocalDate.of(2020, 9, 1)).build();
@@ -140,6 +143,47 @@ public class ReservationServiceTest {
 
         assertThrows(AvailableRoomNotFoundException.class, () ->
                 reservationService.save(reservationToSave));
+    }
+
+    @Test
+    public void shouldUpdateReservationThenReturnReservationWithReassignedRoomId() {
+        Reservation reservationToUpdate = Reservation.builder().id(1L).username("test")
+                .numberOfPeople(5).startDate(LocalDate.of(2020, 8, 1))
+                .endDate(LocalDate.of(2020, 9, 1))
+                .roomId(1L).build();
+
+        when(roomService.reassignRoom(reservationToUpdate)).thenReturn(Optional.of(2L));
+        when(reservationRepository.save(reservationToUpdate)).thenReturn(reservationToUpdate);
+
+        Reservation updatedReservation = reservationService.update(reservationToUpdate).get();
+
+        assertThat(updatedReservation, is(notNullValue()));
+        assertThat(updatedReservation.getId(), is(notNullValue()));
+        assertThat(updatedReservation.getRoomId(), is(notNullValue()));
+        assertThat(updatedReservation.getRoomId(), is(2L));
+        assertThat(updatedReservation.getUsername(), is(reservationToUpdate.getUsername()));
+        assertThat(updatedReservation.getNumberOfPeople(), is(reservationToUpdate.getNumberOfPeople()));
+        assertThat(updatedReservation.getStartDate(), is(reservationToUpdate.getStartDate()));
+        assertThat(updatedReservation.getEndDate(), is(reservationToUpdate.getEndDate()));
+    }
+
+    @Test
+    public void shouldThrowNoAvailableRoomExceptionWhenNoAvailableRoomForUpdatedReservation() {
+        Reservation reservationToUpdate = Reservation.builder().id(1L).username("test")
+                .numberOfPeople(5).startDate(LocalDate.of(2020, 8, 1))
+                .endDate(LocalDate.of(2020, 9, 1))
+                .roomId(1L).build();
+
+        when(roomService.reassignRoom(reservationToUpdate)).thenReturn(Optional.empty());
+
+        assertThrows(AvailableRoomNotFoundException.class, () ->
+                reservationService.save(reservationToUpdate));
+    }
+
+    @Test
+    public void shouldDeleteReservationById() {
+        reservationService.delete(any());
+        verify(reservationRepository, times(1)).deleteById(any());
     }
 
 }
