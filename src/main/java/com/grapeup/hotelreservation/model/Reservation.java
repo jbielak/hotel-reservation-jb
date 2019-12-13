@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -23,15 +24,28 @@ public class Reservation {
 
     private LocalDate endDate;
 
-    private Long roomId;
+    private Room room;
 
     public Reservation(Long id, String username, int numberOfPeople,
-                       LocalDate startDate, LocalDate endDate, Long roomId) {
+                       LocalDate startDate, LocalDate endDate, Room room) {
         this.id = id;
         this.username = username;
         this.numberOfPeople = numberOfPeople;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.roomId = roomId;
+        this.room = room;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Reservation that = (Reservation) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

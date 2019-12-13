@@ -1,6 +1,7 @@
 package com.grapeup.hotelreservation.service;
 
 import com.grapeup.hotelreservation.model.Reservation;
+import com.grapeup.hotelreservation.model.Room;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -9,12 +10,12 @@ import java.util.Optional;
 public class DefaultRoomService implements RoomService {
 
     @Override
-    public Optional<Long> assignRoom(Reservation reservation) {
+    public Optional<Room> assignRoom(Reservation reservation) {
         return null;
     }
 
     @Override
-    public Optional<Long> reassignRoom(Reservation reservation) {
+    public Optional<Room> reassignRoom(Reservation reservation) {
         return null;
     }
 }
