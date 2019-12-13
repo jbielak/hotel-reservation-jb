@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
@@ -52,5 +53,21 @@ public class ReservationRepositoryTest {
         Optional<Reservation> reservation = reservationRepository.findById(3L);
 
         assertThat(reservation.isPresent(), is(false));
+    }
+
+    @Test
+    public void shouldFindReservationsForRoom() {
+        List<Reservation> reservations = reservationRepository.findForRoom(1L);
+
+        assertThat(reservations, is(notNullValue()));
+        assertThat(reservations, hasSize(2));
+    }
+
+    @Test
+    public void shouldNotFindReservationsForRoom() {
+        List<Reservation> reservations = reservationRepository.findForRoom(2L);
+
+        assertThat(reservations, is(notNullValue()));
+        assertThat(reservations, hasSize(0));
     }
 }
