@@ -2,6 +2,7 @@ package com.grapeup.hotelreservation.converter;
 
 import com.grapeup.hotelreservation.dto.ReservationDto;
 import com.grapeup.hotelreservation.model.Reservation;
+import com.grapeup.hotelreservation.model.Room;
 
 public abstract class ReservationConverter {
 
@@ -12,7 +13,7 @@ public abstract class ReservationConverter {
                 .numberOfPeople(reservation.getNumberOfPeople())
                 .startDate(reservation.getStartDate())
                 .endDate(reservation.getEndDate())
-                .roomId(reservation.getRoomId())
+                .roomId(reservation.getRoom().getId())
                 .build();
     }
 
@@ -23,7 +24,7 @@ public abstract class ReservationConverter {
                 .numberOfPeople(reservationDto.getNumberOfPeople())
                 .startDate(reservationDto.getStartDate())
                 .endDate(reservationDto.getEndDate())
-                .roomId(reservationDto.getRoomId())
+                .room(Room.builder().id(reservationDto.getRoomId()).build())
                 .build();
     }
 

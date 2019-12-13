@@ -13,6 +13,6 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
 
     List<Reservation> findAll();
 
-    @Query("SELECT r FROM Reservation r WHERE r.roomId = :roomId")
+    @Query("SELECT r FROM Reservation r WHERE r.room.id = :roomId")
     List<Reservation> findForRoom(@Param("roomId") Long roomId);
 }

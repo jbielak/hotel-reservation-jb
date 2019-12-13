@@ -2,6 +2,8 @@ package com.grapeup.hotelreservation.service;
 
 import com.grapeup.hotelreservation.exception.AvailableRoomNotFoundException;
 import com.grapeup.hotelreservation.model.Reservation;
+import com.grapeup.hotelreservation.model.Room;
+import com.grapeup.hotelreservation.model.RoomType;
 import com.grapeup.hotelreservation.repository.ReservationRepository;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -15,6 +17,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,13 +47,16 @@ public class ReservationServiceTest {
     private ReservationService reservationService;
 
     private static Reservation mockReservation;
+    private static Room mockRoom;
 
     @BeforeAll
     public static void setup() {
         mockReservation = Reservation.builder().id(1L).username("test")
                 .numberOfPeople(3).startDate(LocalDate.of(2020, 8, 1))
-                .endDate(LocalDate.of(2020, 9, 1))
-                .roomId(1L).build();
+                .endDate(LocalDate.of(2020, 9, 1)).build();
+        mockRoom = Room.builder().id(1L).roomType(RoomType.BASIC)
+                .reservations(new HashSet<>(Arrays.asList(mockReservation))).build();
+        mockReservation.setRoom(mockRoom);
     }
 
     @Test
@@ -67,7 +73,7 @@ public class ReservationServiceTest {
         Reservation reservation2 = Reservation.builder().id(2L).username("test")
                 .numberOfPeople(3).startDate(LocalDate.of(2020, 8, 1))
                 .endDate(LocalDate.of(2021, 9, 1))
-                .roomId(1L).build();
+                .room(mockRoom).build();
 
         when(reservationRepository.findAll()).thenReturn(Arrays.asList(mockReservation, reservation2));
 
@@ -80,7 +86,7 @@ public class ReservationServiceTest {
         assertThat(reservations.get(0).getNumberOfPeople(), is(mockReservation.getNumberOfPeople()));
         assertThat(reservations.get(0).getStartDate(), is(mockReservation.getStartDate()));
         assertThat(reservations.get(0).getEndDate(), is(mockReservation.getEndDate()));
-        assertThat(reservations.get(0).getRoomId(), is(mockReservation.getRoomId()));
+        assertThat(reservations.get(0).getRoom().getId(), is(mockReservation.getRoom().getId()));
     }
 
     @Test
@@ -95,7 +101,7 @@ public class ReservationServiceTest {
         assertThat(reservation.get().getNumberOfPeople(), is(mockReservation.getNumberOfPeople()));
         assertThat(reservation.get().getStartDate(), is(mockReservation.getStartDate()));
         assertThat(reservation.get().getEndDate(), is(mockReservation.getEndDate()));
-        assertThat(reservation.get().getRoomId(), is(mockReservation.getRoomId()));
+        assertThat(reservation.get().getRoom().getId(), is(mockReservation.getRoom().getId()));
     }
 
     @Test
@@ -113,7 +119,7 @@ public class ReservationServiceTest {
                 .numberOfPeople(3).startDate(LocalDate.of(2020, 8, 1))
                 .endDate(LocalDate.of(2020, 9, 1)).build();
 
-        when(roomService.assignRoom(reservationToSave)).thenReturn(Optional.of(1L));
+        when(roomService.assignRoom(reservationToSave)).thenReturn(Optional.of(mockRoom));
 
         doAnswer(invocation -> {
             ReflectionTestUtils.setField((Reservation) invocation.getArgument(0), "id", 1L);
@@ -125,8 +131,8 @@ public class ReservationServiceTest {
         assertThat(savedReservation, is(notNullValue()));
         assertThat(savedReservation.getId(), is(1L));
         assertThat(savedReservation.getId(), is(notNullValue()));
-        assertThat(savedReservation.getRoomId(), is(notNullValue()));
-        assertThat(savedReservation.getRoomId(), is(1L));
+        assertThat(savedReservation.getRoom().getId(), is(notNullValue()));
+        assertThat(savedReservation.getRoom().getId(), is(1L));
         assertThat(savedReservation.getUsername(), is(reservationToSave.getUsername()));
         assertThat(savedReservation.getNumberOfPeople(), is(reservationToSave.getNumberOfPeople()));
         assertThat(savedReservation.getStartDate(), is(reservationToSave.getStartDate()));
@@ -149,18 +155,22 @@ public class ReservationServiceTest {
     public void shouldUpdateReservationThenReturnReservationWithReassignedRoomId() {
         Reservation reservationToUpdate = Reservation.builder().id(1L).username("test")
                 .numberOfPeople(5).startDate(LocalDate.of(2020, 8, 1))
-                .endDate(LocalDate.of(2020, 9, 1))
-                .roomId(1L).build();
+                .endDate(LocalDate.of(2020, 9, 1)).build();
 
-        when(roomService.reassignRoom(reservationToUpdate)).thenReturn(Optional.of(2L));
+        Room roomToUpdate = Room.builder().id(1L).roomType(RoomType.BASIC)
+                .reservations(new HashSet<>(Arrays.asList(reservationToUpdate))).build();
+        reservationToUpdate.setRoom(roomToUpdate);
+        Room newRoom = Room.builder().id(2L).roomType(RoomType.SUITE)
+                .reservations(new HashSet<>(Arrays.asList(reservationToUpdate))).build();
+        when(roomService.reassignRoom(reservationToUpdate)).thenReturn(Optional.of(newRoom));
         when(reservationRepository.save(reservationToUpdate)).thenReturn(reservationToUpdate);
 
         Reservation updatedReservation = reservationService.update(reservationToUpdate).get();
 
         assertThat(updatedReservation, is(notNullValue()));
         assertThat(updatedReservation.getId(), is(notNullValue()));
-        assertThat(updatedReservation.getRoomId(), is(notNullValue()));
-        assertThat(updatedReservation.getRoomId(), is(2L));
+        assertThat(updatedReservation.getRoom().getId(), is(notNullValue()));
+        assertThat(updatedReservation.getRoom().getId(), is(2L));
         assertThat(updatedReservation.getUsername(), is(reservationToUpdate.getUsername()));
         assertThat(updatedReservation.getNumberOfPeople(), is(reservationToUpdate.getNumberOfPeople()));
         assertThat(updatedReservation.getStartDate(), is(reservationToUpdate.getStartDate()));
@@ -171,8 +181,11 @@ public class ReservationServiceTest {
     public void shouldThrowNoAvailableRoomExceptionWhenNoAvailableRoomForUpdatedReservation() {
         Reservation reservationToUpdate = Reservation.builder().id(1L).username("test")
                 .numberOfPeople(5).startDate(LocalDate.of(2020, 8, 1))
-                .endDate(LocalDate.of(2020, 9, 1))
-                .roomId(1L).build();
+                .endDate(LocalDate.of(2020, 9, 1)).build();
+
+        Room roomToUpdate = Room.builder().id(1L).roomType(RoomType.BASIC)
+                .reservations(new HashSet<>(Arrays.asList(reservationToUpdate))).build();
+        reservationToUpdate.setRoom(roomToUpdate);
 
         when(roomService.reassignRoom(reservationToUpdate)).thenReturn(Optional.empty());
 
@@ -201,8 +214,10 @@ public class ReservationServiceTest {
     public void shouldReturnEListOfReservationsForRoom() {
         Reservation reservation2 = Reservation.builder().id(2L).username("test")
                 .numberOfPeople(3).startDate(LocalDate.of(2020, 8, 1))
-                .endDate(LocalDate.of(2021, 9, 1))
-                .roomId(1L).build();
+                .endDate(LocalDate.of(2021, 9, 1)).build();
+        Room room = Room.builder().id(1L).roomType(RoomType.BASIC)
+                .reservations(new HashSet<>(Arrays.asList(reservation2))).build();
+        reservation2.setRoom(room);
         when(reservationRepository.findForRoom(anyLong())).thenReturn(Arrays.asList(mockReservation, reservation2));
 
         List<Reservation> reservations = reservationService.findForRoom(1L);

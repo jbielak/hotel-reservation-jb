@@ -32,7 +32,7 @@ public class ReservationRepositoryTest {
         assertThat(reservations.get(0).getNumberOfPeople(), is(6) );
         assertThat(reservations.get(0).getStartDate().toString(), is("2019-12-14"));
         assertThat(reservations.get(0).getEndDate().toString(), is("2019-12-20"));
-        assertThat(reservations.get(0).getRoomId(), is(1L));
+        assertThat(reservations.get(0).getRoom().getId(), is(1L));
     }
 
     @Test
@@ -45,7 +45,7 @@ public class ReservationRepositoryTest {
         assertThat(reservation.get().getNumberOfPeople(), is(6) );
         assertThat(reservation.get().getStartDate().toString(), is("2019-12-14"));
         assertThat(reservation.get().getEndDate().toString(), is("2019-12-20"));
-        assertThat(reservation.get().getRoomId(), is(1L));
+        assertThat(reservation.get().getRoom().getId(), is(1L));
     }
 
     @Test

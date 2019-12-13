@@ -19,7 +19,7 @@ public class DefaultRoomService implements RoomService {
     }
 
     @Override
-    public Optional<Long> assignRoom(Reservation reservation) {
+    public Optional<Room> assignRoom(Reservation reservation) {
 
         List<Room> rooms = roomRepository.findRoomWithCapacity(reservation.getNumberOfPeople());
         Room availableRoom = rooms.stream()
@@ -28,12 +28,12 @@ public class DefaultRoomService implements RoomService {
                         bookedReservation.getStartDate(), bookedReservation.getEndDate())).findAny().isEmpty())
                 .findFirst().get();
 
-        return Optional.of(availableRoom.getId());
+        return Optional.of(availableRoom);
 
     }
 
     @Override
-    public Optional<Long> reassignRoom(Reservation reservation) {
+    public Optional<Room> reassignRoom(Reservation reservation) {
         return null;
     }
 
