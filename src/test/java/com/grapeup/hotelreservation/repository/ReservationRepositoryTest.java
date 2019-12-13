@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,6 +13,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.IsNot.not;
 
 @DataJpaTest
@@ -68,5 +70,20 @@ public class ReservationRepositoryTest {
         List<Reservation> reservations = reservationRepository.findForRoom(88L);
 
         assertThat(reservations, hasSize(0));
+    }
+
+    @Test
+    public void shouldCreateReservation() {
+        Reservation newReservation = Reservation.builder().username("test")
+                .numberOfPeople(3).startDate(LocalDate.of(2021, 8, 1))
+                .endDate(LocalDate.of(2021, 9, 1))
+                //.room(Room.builder().id(3L).roomType(RoomType.BASIC).build())
+                .build();
+
+        Reservation createdReservation = reservationRepository.save(newReservation);
+
+        assertThat(createdReservation, is(notNullValue()));
+        assertThat(createdReservation.getId(), is(4L));
+
     }
 }
