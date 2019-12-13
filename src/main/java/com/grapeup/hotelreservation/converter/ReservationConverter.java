@@ -12,7 +12,7 @@ public abstract class ReservationConverter {
                 .numberOfPeople(reservation.getNumberOfPeople())
                 .startDate(reservation.getStartDate())
                 .endDate(reservation.getEndDate())
-                .roomId(reservation.getRoomId())
+                .roomId(reservation.getRoom().getId())
                 .build();
     }
 
@@ -23,7 +23,6 @@ public abstract class ReservationConverter {
                 .numberOfPeople(reservationDto.getNumberOfPeople())
                 .startDate(reservationDto.getStartDate())
                 .endDate(reservationDto.getEndDate())
-                .roomId(reservationDto.getRoomId())
                 .build();
     }
 
