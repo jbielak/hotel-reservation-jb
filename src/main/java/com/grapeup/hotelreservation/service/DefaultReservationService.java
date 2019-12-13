@@ -2,6 +2,7 @@ package com.grapeup.hotelreservation.service;
 
 import com.grapeup.hotelreservation.exception.AvailableRoomNotFoundException;
 import com.grapeup.hotelreservation.model.Reservation;
+import com.grapeup.hotelreservation.model.Room;
 import com.grapeup.hotelreservation.repository.ReservationRepository;
 import org.springframework.stereotype.Service;
 
@@ -34,9 +35,9 @@ public class DefaultReservationService  implements ReservationService {
     @Override
     public Reservation save(Reservation reservation) {
 
-        Optional<Long> availableRoom = roomService.assignRoom(reservation);
+        Optional<Room> availableRoom = roomService.assignRoom(reservation);
         if (availableRoom.isPresent()) {
-            reservation.setRoomId(availableRoom.get());
+            reservation.setRoom(availableRoom.get());
         } else {
             throw new AvailableRoomNotFoundException();
         }
@@ -45,10 +46,10 @@ public class DefaultReservationService  implements ReservationService {
 
     @Override
     public Optional<Reservation> update(Reservation reservation) {
-        Optional<Long> availableRoom = roomService.reassignRoom(reservation);
+        Optional<Room> availableRoom = roomService.reassignRoom(reservation);
 
         if (availableRoom.isPresent()) {
-            reservation.setRoomId(availableRoom.get());
+            reservation.setRoom(availableRoom.get());
         } else {
             throw new AvailableRoomNotFoundException();
         }
