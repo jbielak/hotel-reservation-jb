@@ -8,5 +8,5 @@ import java.util.Optional;
 public interface RoomService {
 
     Optional<Room> assignRoom(Reservation reservation);
-    Optional<Room> reassignRoom(Reservation reservation);
+
 }
