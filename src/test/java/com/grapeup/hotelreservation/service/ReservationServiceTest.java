@@ -160,7 +160,7 @@ public class ReservationServiceTest {
                 .room(mockRoom).build();
         Room newRoom = Room.builder().id(2L).roomType(RoomType.SUITE).build();
 
-        when(roomService.reassignRoom(reservationToUpdate)).thenReturn(Optional.of(newRoom));
+        when(roomService.assignRoom(reservationToUpdate)).thenReturn(Optional.of(newRoom));
         when(reservationRepository.save(reservationToUpdate)).thenReturn(reservationToUpdate);
 
         Reservation updatedReservation = reservationService.update(reservationToUpdate).get();
@@ -183,7 +183,7 @@ public class ReservationServiceTest {
                 .endDate(LocalDate.of(2020, 9, 1))
                 .room(mockRoom).build();
 
-        when(roomService.reassignRoom(reservationToUpdate)).thenReturn(Optional.empty());
+        when(roomService.assignRoom(reservationToUpdate)).thenReturn(Optional.empty());
 
         assertThrows(AvailableRoomNotFoundException.class, () ->
                 reservationService.save(reservationToUpdate));
