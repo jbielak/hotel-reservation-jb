@@ -46,7 +46,7 @@ public class DefaultReservationService  implements ReservationService {
 
     @Override
     public Optional<Reservation> update(Reservation reservation) {
-        Optional<Room> availableRoom = roomService.reassignRoom(reservation);
+        Optional<Room> availableRoom = roomService.assignRoom(reservation);
 
         if (availableRoom.isPresent()) {
             reservation.setRoom(availableRoom.get());
