@@ -7,6 +7,7 @@ import java.util.Optional;
 
 public interface RoomService {
 
+    boolean areDatesAvailableInCurrentRoom(Reservation reservation);
     Optional<Room> assignRoom(Reservation reservation);
 
 }

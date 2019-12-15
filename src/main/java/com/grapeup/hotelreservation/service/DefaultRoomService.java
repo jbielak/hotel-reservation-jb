@@ -6,6 +6,7 @@ import com.grapeup.hotelreservation.model.RoomType;
 import com.grapeup.hotelreservation.repository.RoomRepository;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -17,6 +18,19 @@ public class DefaultRoomService implements RoomService {
 
     public DefaultRoomService(RoomRepository roomRepository) {
         this.roomRepository = roomRepository;
+    }
+
+    @Override
+    public boolean areDatesAvailableInCurrentRoom(Reservation reservation) {
+        List<Reservation> reservationsWithOverlappingDates =
+                reservation.getRoom().getReservations().stream()
+                .filter(r -> areIntervalsOverlapping(reservation.getStartDate(),
+                        reservation.getEndDate(), r.getStartDate(), r.getEndDate()))
+                .collect(Collectors.toList());
+
+        return reservationsWithOverlappingDates.isEmpty() ||
+                (reservationsWithOverlappingDates.size() == 1
+                        && reservationsWithOverlappingDates.get(0).equals(reservation));
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.grapeup.hotelreservation.converter.ReservationConverter;
 import com.grapeup.hotelreservation.dto.ReservationDto;
 import com.grapeup.hotelreservation.model.Reservation;
 import com.grapeup.hotelreservation.service.ReservationService;
+import java.time.LocalDate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -80,15 +81,26 @@ public class ReservationController {
                                            @PathVariable Long id) {
 
         Optional<Reservation> existingReservation = reservationService.findById(id);
+        if (existingReservation.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Reservation updated = Reservation.builder()
+                .username(existingReservation.get().getUsername())
+                .numberOfPeople(existingReservation.get().getNumberOfPeople())
+                .startDate(existingReservation.get().getStartDate())
+                .endDate(existingReservation.get().getEndDate())
+                .room(existingReservation.get().getRoom())
+                .id(id).build();
 
         return existingReservation.map(r -> {
-            r.setUsername(reservation.getUsername());
-            r.setNumberOfPeople(reservation.getNumberOfPeople());
-            r.setStartDate(reservation.getStartDate());
-            r.setEndDate(reservation.getEndDate());
+            updated.setUsername(reservation.getUsername());
+            updated.setNumberOfPeople(reservation.getNumberOfPeople());
+            updated.setStartDate(reservation.getStartDate());
+            updated.setEndDate(reservation.getEndDate());
 
             try {
-                if (reservationService.update(r).isPresent()) {
+                if (reservationService.update(updated, r).isPresent()) {
                     return ResponseEntity.ok()
                             .location(new URI(RESERVATIONS_MAPPING + r.getId()))
                             .body(ReservationConverter.toDto(r));
