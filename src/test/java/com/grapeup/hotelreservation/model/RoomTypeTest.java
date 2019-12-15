@@ -1,5 +1,6 @@
 package com.grapeup.hotelreservation.model;
 
+import com.grapeup.hotelreservation.exception.IncorrectNumberOfPeopleException;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -41,14 +42,14 @@ public class RoomTypeTest {
     }
 
     @Test
-    public void shouldThrowIllegalArgumentExceptionWhenMoreThan8PlacesRequired() {
-        assertThrows(IllegalArgumentException.class, () ->
+    public void shouldThrowIncorrectNumberOfPeopleExceptionWhenMoreThan8PlacesRequired() {
+        assertThrows(IncorrectNumberOfPeopleException.class, () ->
                 RoomType.getFittingSize(9));
     }
 
     @Test
-    public void shouldThrowIllegalArgumentExceptionWhenLessThan1Passed() {
-        assertThrows(IllegalArgumentException.class, () ->
+    public void shouldThrowIncorrectNumberOfPeopleExceptionWhenLessThan1Passed() {
+        assertThrows(IncorrectNumberOfPeopleException.class, () ->
                 RoomType.getFittingSize(9));
     }
 }
