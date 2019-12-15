@@ -4,7 +4,6 @@ import com.grapeup.hotelreservation.converter.ReservationConverter;
 import com.grapeup.hotelreservation.dto.ReservationDto;
 import com.grapeup.hotelreservation.model.Reservation;
 import com.grapeup.hotelreservation.service.ReservationService;
-import java.time.LocalDate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,7 +35,7 @@ public class ReservationController {
     }
 
     @GetMapping()
-    public List<ReservationDto> getReservations(@RequestParam(required = false) Long roomId) {
+    public List<ReservationDto> getReservations(@RequestParam(name="roomNumber", required = false) Long roomId) {
         if (roomId != null) {
             return reservationService.findForRoom(roomId).stream()
                     .map(ReservationConverter::toDto)
