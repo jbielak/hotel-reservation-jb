@@ -128,4 +128,34 @@ public class RoomServiceTest {
         assertThat(availableRoom.isEmpty(), is(true));
     }
 
+    @Test
+    public void shouldReturnTrueWhenDatesInCurrentRoomAreOverlappingOnlyWithUpdatingReservation() {
+        reservation1.setStartDate(LocalDate.of(2020, 7, 1));
+        reservation1.setEndDate(LocalDate.of(2020, 7, 31));
+
+        assertThat(roomService.areDatesAvailableInCurrentRoom(reservation1),
+                is(true));
+    }
+
+    @Test
+    public void shouldReturnFalseWhenDatesInCurrentRoomAreOverlappingWithOtherReservation() {
+        reservation1.setStartDate(LocalDate.of(2020, 7, 1));
+        reservation1.setEndDate(LocalDate.of(2020, 7, 31));
+
+        Reservation reservation3 = Reservation.builder()
+                .username("test").id(3L).numberOfPeople(3)
+                .startDate(LocalDate.of(2020, 9, 5))
+                .endDate(LocalDate.of(2020, 9, 30)).build();
+        roomId1.getReservations().add(reservation3);
+
+        Reservation reservationToAdd = Reservation.builder()
+                .username("test").id(4L).numberOfPeople(3)
+                .startDate(LocalDate.of(2020, 9, 4))
+                .endDate(LocalDate.of(2020, 9, 20))
+                .room(roomId1).build();
+        roomId1.getReservations().add(reservationToAdd);
+
+        assertThat(roomService.areDatesAvailableInCurrentRoom(reservationToAdd), is(false));
+    }
+
 }
