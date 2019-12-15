@@ -156,14 +156,15 @@ public class ReservationServiceTest {
     public void shouldUpdateReservationThenReturnReservationWithReassignedRoomId() {
         Reservation reservationToUpdate = Reservation.builder().id(1L).username("test")
                 .numberOfPeople(5).startDate(LocalDate.of(2020, 8, 1))
-                .endDate(LocalDate.of(2020, 9, 1))
-                .room(mockRoom).build();
+                .endDate(LocalDate.of(2020, 9, 1)).build();
         Room newRoom = Room.builder().id(2L).roomType(RoomType.SUITE).build();
 
         when(roomService.assignRoom(reservationToUpdate)).thenReturn(Optional.of(newRoom));
         when(reservationRepository.save(reservationToUpdate)).thenReturn(reservationToUpdate);
+        when(reservationRepository.findById(anyLong())).thenReturn(Optional.of(mockReservation));
 
-        Reservation updatedReservation = reservationService.update(reservationToUpdate).get();
+        Reservation updatedReservation =
+                reservationService.update(reservationToUpdate, mockReservation).get();
 
         assertThat(updatedReservation, is(notNullValue()));
         assertThat(updatedReservation.getId(), is(notNullValue()));
@@ -174,6 +175,59 @@ public class ReservationServiceTest {
         assertThat(updatedReservation.getNumberOfPeople(), is(reservationToUpdate.getNumberOfPeople()));
         assertThat(updatedReservation.getStartDate(), is(reservationToUpdate.getStartDate()));
         assertThat(updatedReservation.getEndDate(), is(reservationToUpdate.getEndDate()));
+    }
+
+    @Test
+    public void shouldUpdateReservationWithoutAssigningNewRoomType() {
+        Reservation reservationToUpdate = Reservation.builder().id(1L).username("test")
+                .numberOfPeople(4).startDate(LocalDate.of(2020, 8, 1))
+                .endDate(LocalDate.of(2020, 9, 1))
+                .room(mockRoom).build();
+
+        when(reservationRepository.findById(anyLong())).thenReturn(Optional.of(mockReservation));
+        when(reservationRepository.save(reservationToUpdate)).thenReturn(reservationToUpdate);
+
+        Reservation updatedReservation =
+                reservationService.update(reservationToUpdate, mockReservation).get();
+
+        assertThat(updatedReservation, is(notNullValue()));
+        assertThat(updatedReservation.getId(), is(notNullValue()));
+        assertThat(updatedReservation.getRoom(), is(notNullValue()));
+        assertThat(updatedReservation.getRoom().getId(), is(notNullValue()));
+        assertThat(updatedReservation.getRoom().getId(), is(1L));
+        assertThat(updatedReservation.getUsername(), is(reservationToUpdate.getUsername()));
+        assertThat(updatedReservation.getNumberOfPeople(), is(reservationToUpdate.getNumberOfPeople()));
+        assertThat(updatedReservation.getStartDate(), is(reservationToUpdate.getStartDate()));
+        assertThat(updatedReservation.getEndDate(), is(reservationToUpdate.getEndDate()));
+
+        verify(roomService, times(0)).assignRoom(any());
+    }
+
+    @Test
+    public void shouldUpdateReservationWithoutAssigningNewRoomTypeWhenNewDatesAreAvailable() {
+        Reservation reservationToUpdate = Reservation.builder().id(1L).username("test")
+                .numberOfPeople(4).startDate(LocalDate.of(2020, 8, 2))
+                .endDate(LocalDate.of(2020, 9, 2))
+                .room(mockRoom).build();
+
+        when(reservationRepository.findById(anyLong())).thenReturn(Optional.of(mockReservation));
+        when(reservationRepository.save(reservationToUpdate)).thenReturn(reservationToUpdate);
+        when(roomService.areDatesAvailableInCurrentRoom(any())).thenReturn(true);
+
+        Reservation updatedReservation =
+                reservationService.update(reservationToUpdate, mockReservation).get();
+
+        assertThat(updatedReservation, is(notNullValue()));
+        assertThat(updatedReservation.getId(), is(notNullValue()));
+        assertThat(updatedReservation.getRoom(), is(notNullValue()));
+        assertThat(updatedReservation.getRoom().getId(), is(notNullValue()));
+        assertThat(updatedReservation.getRoom().getId(), is(1L));
+        assertThat(updatedReservation.getUsername(), is(reservationToUpdate.getUsername()));
+        assertThat(updatedReservation.getNumberOfPeople(), is(reservationToUpdate.getNumberOfPeople()));
+        assertThat(updatedReservation.getStartDate(), is(reservationToUpdate.getStartDate()));
+        assertThat(updatedReservation.getEndDate(), is(reservationToUpdate.getEndDate()));
+
+        verify(roomService, times(0)).assignRoom(any());
     }
 
     @Test
@@ -218,4 +272,5 @@ public class ReservationServiceTest {
         assertThat(reservations, is(notNullValue()));
         assertThat(reservations, hasSize(2));
     }
+
 }

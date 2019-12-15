@@ -29,6 +29,7 @@ import java.util.Set;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -217,7 +218,7 @@ public class ReservationControllerTest {
                 .endDate(LocalDate.of(2020, 9, 1))
                 .roomId(1L).build();
         doReturn(Optional.of(mockReservation)).when(reservationService).findById(1L);
-        doReturn(Optional.of(mockReservation)).when(reservationService).update(any());
+        doReturn(Optional.of(mockReservation)).when(reservationService).update(any(), any());
 
         mockMvc.perform(put("/reservations/{id}", 1)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -257,7 +258,7 @@ public class ReservationControllerTest {
                 .endDate(LocalDate.of(2023, 9, 1))
                 .roomId(1L).build();
         doReturn(Optional.of(mockReservation)).when(reservationService).findById(1L);
-        doReturn(Optional.of(mockReservation)).when(reservationService).update(any());
+        doReturn(Optional.of(mockReservation)).when(reservationService).update(any(), any());
 
         mockMvc.perform(put("/reservations/{id}", 1)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -274,7 +275,7 @@ public class ReservationControllerTest {
                 .endDate(LocalDate.of(2018, 9, 1))
                 .roomId(1L).build();
         doReturn(Optional.of(mockReservation)).when(reservationService).findById(1L);
-        doReturn(Optional.of(mockReservation)).when(reservationService).update(any());
+        doReturn(Optional.of(mockReservation)).when(reservationService).update(any(), any());
 
         mockMvc.perform(put("/reservations/{id}", 1)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -291,7 +292,7 @@ public class ReservationControllerTest {
                 .endDate(LocalDate.of(2024, 8, 1))
                 .roomId(1L).build();
         doReturn(Optional.of(mockReservation)).when(reservationService).findById(1L);
-        doReturn(Optional.of(mockReservation)).when(reservationService).update(any());
+        doReturn(Optional.of(mockReservation)).when(reservationService).update(any(), any());
 
         mockMvc.perform(put("/reservations/{id}", 1)
                 .contentType(MediaType.APPLICATION_JSON)

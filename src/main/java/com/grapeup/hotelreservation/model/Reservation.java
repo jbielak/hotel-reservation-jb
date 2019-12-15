@@ -1,12 +1,11 @@
 package com.grapeup.hotelreservation.model;
 
+import java.time.LocalDate;
+import java.util.Objects;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDate;
-import java.util.Objects;
 
 @Getter
 @Setter
@@ -48,4 +47,5 @@ public class Reservation {
     public int hashCode() {
         return Objects.hash(id);
     }
+
 }
