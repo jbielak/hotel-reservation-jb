@@ -9,6 +9,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import lombok.Builder;
@@ -39,7 +40,8 @@ public class Reservation {
     @Column(name ="end_date")
     private LocalDate endDate;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.ALL)
+    @ManyToOne (fetch = FetchType.EAGER)
+    @JoinColumn(name = "room_id")
     private Room room;
 
     public Reservation(Long id, String username, int numberOfPeople,
