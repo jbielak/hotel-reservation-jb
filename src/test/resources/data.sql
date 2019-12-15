@@ -21,3 +21,4 @@ CREATE TABLE IF NOT EXISTS reservation (
 
 INSERT INTO reservation VALUES(1, 'test_user', 7, '2020-12-17', '2020-12-20', 1);
 INSERT INTO reservation VALUES(2, 'test_user', 8, '2021-12-22', '2020-12-28', 1);
+INSERT INTO reservation VALUES(3, 'test_user', 3, '2020-12-12', '2020-12-28', 2);
