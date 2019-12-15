@@ -1,6 +1,11 @@
 package com.grapeup.hotelreservation.repository;
 
 import com.grapeup.hotelreservation.model.Reservation;
+import com.grapeup.hotelreservation.model.Room;
+import com.grapeup.hotelreservation.model.RoomType;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -21,7 +26,7 @@ public class ReservationRepositoryTest {
         List<Reservation> reservations = reservationRepository.findAll();
 
         assertThat(reservations, is(not(empty())));
-        assertThat(reservations, hasSize(3));
+        assertThat(reservations, hasSize(4));
         assertThat(reservations.get(0).getId(), is(1L) );
         assertThat(reservations.get(0).getUsername(), is("test_user") );
         assertThat(reservations.get(0).getNumberOfPeople(), is(7) );
@@ -69,5 +74,43 @@ public class ReservationRepositoryTest {
         List<Reservation> reservations = reservationRepository.findForRoom(3L);
 
         assertThat(reservations, is(empty()));
+    }
+
+    @Test
+    public void shouldCreateReservation() {
+        Reservation newReservation = Reservation.builder()
+                .username("new reservation")
+                .numberOfPeople(8)
+                .startDate(LocalDate.of(2022, 1, 5))
+                .endDate(LocalDate.of(2022, 1, 15))
+                .build();
+
+        reservationRepository.save(newReservation);
+
+        List<Reservation> reservations = reservationRepository.findAll();
+        Optional<Reservation> createdReservation = reservationRepository.findById(5L);
+
+        assertThat(reservations, hasSize(5));
+        assertThat(createdReservation.isPresent(), is(true));
+        assertThat(createdReservation.get().getId(), is(5L));
+    }
+
+    @Test
+    public void shouldUpdateReservation() {
+        Optional<Reservation> reservationToUpdate = reservationRepository.findById(4L);
+        assertThat(reservationToUpdate.isPresent(), is(true));
+
+        reservationToUpdate.get().setUsername("changed");
+        reservationRepository.save(reservationToUpdate.get());
+
+        List<Reservation> reservations = reservationRepository.findAll();
+        Optional<Reservation> updatedReservation = reservationRepository.findById(4L);
+
+        assertThat(reservations, hasSize(4));
+        assertThat(updatedReservation.isPresent(), is(true));
+        assertThat(updatedReservation.get().getId(), is(4L));
+        assertThat(updatedReservation.get().getUsername(), is("changed"));
+        assertThat(updatedReservation.get().getRoom(), notNullValue());
+        assertThat(updatedReservation.get().getRoom().getId(), is(2L));
     }
 }
