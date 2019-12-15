@@ -2,14 +2,12 @@ package com.grapeup.hotelreservation.repository;
 
 import com.grapeup.hotelreservation.model.Reservation;
 import com.grapeup.hotelreservation.model.Room;
-import com.grapeup.hotelreservation.model.RoomType;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -20,6 +18,9 @@ public class ReservationRepositoryTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private RoomRepository roomRepository;
 
     @Test
     public void shouldFindAllReservations() {
@@ -112,5 +113,37 @@ public class ReservationRepositoryTest {
         assertThat(updatedReservation.get().getUsername(), is("changed"));
         assertThat(updatedReservation.get().getRoom(), notNullValue());
         assertThat(updatedReservation.get().getRoom().getId(), is(2L));
+    }
+
+
+    @Test
+    public void shouldDeleteReservationById() {
+        List<Reservation> reservationsBeforeDelete = reservationRepository.findAll();
+        assertThat(reservationsBeforeDelete, hasSize(4));
+
+        reservationRepository.deleteById(4L);
+
+        List<Reservation> reservations = reservationRepository.findAll();
+        Optional<Reservation> deletedReservation = reservationRepository.findById(4L);
+
+        assertThat(reservations, hasSize(3));
+        assertThat(deletedReservation.isEmpty(), is(true));
+    }
+
+    @Test
+    public void shouldNotRemoveParentRoomWhenAllChildrenReservationsRemoved() {
+        List<Reservation> reservationsBeforeDelete = reservationRepository.findAll();
+        assertThat(reservationsBeforeDelete, hasSize(4));
+
+        reservationRepository.deleteById(3L);
+        reservationRepository.deleteById(4L);
+
+        List<Reservation> reservations = reservationRepository.findAll();
+        //Optional<Reservation> updatedReservation = reservationRepository.findById(4L);
+        Optional<Room> parent = roomRepository.findById(2L);
+
+        assertThat(reservations, hasSize(2));
+        assertThat(parent.isPresent(), is(true));
+        assertThat(parent.get().getReservations(), is(empty()));
     }
 }
