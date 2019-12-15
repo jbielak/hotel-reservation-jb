@@ -5,9 +5,9 @@ import com.grapeup.hotelreservation.model.Reservation;
 import com.grapeup.hotelreservation.model.Room;
 import com.grapeup.hotelreservation.model.RoomType;
 import com.grapeup.hotelreservation.repository.ReservationRepository;
-import java.time.LocalDate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,8 +49,9 @@ public class DefaultReservationService  implements ReservationService {
     @Override
     public Optional<Reservation> update(Reservation reservation, Reservation existingReservation) {
 
-        if (onlyNumberOfPeopleChanged(reservation, existingReservation)
-        || roomService.areDatesAvailableInCurrentRoom(reservation)) {
+        if (roomSizeAndDatesNotChanged(reservation, existingReservation)
+            || roomSizeNotChangedAndDatesInCurrentRumAreAvailable(reservation, existingReservation,
+                roomService.areDatesAvailableInCurrentRoom(reservation))) {
             return Optional.of(reservationRepository.save(reservation));
         }
 
@@ -74,11 +75,20 @@ public class DefaultReservationService  implements ReservationService {
         return reservationRepository.findForRoom(roomId);
     }
 
-    private static boolean onlyNumberOfPeopleChanged(Reservation updated,
+    private static boolean roomSizeAndDatesNotChanged(Reservation updated,
                                                      Reservation existingReservation) {
         return !shouldAssignDifferentTypeOfRoom(updated, existingReservation.getNumberOfPeople())
                 && areDatesSame(updated, existingReservation.getStartDate(),
                 existingReservation.getEndDate());
+    }
+
+    private static boolean roomSizeNotChangedAndDatesInCurrentRumAreAvailable(Reservation updated,
+                                                      Reservation existingReservation,
+                                                                           boolean datesInCurrentRoomAvailable) {
+        return !shouldAssignDifferentTypeOfRoom(updated, existingReservation.getNumberOfPeople())
+                && !areDatesSame(updated, existingReservation.getStartDate(),
+                existingReservation.getEndDate())
+                && datesInCurrentRoomAvailable;
     }
 
     private static boolean shouldAssignDifferentTypeOfRoom(Reservation updated,

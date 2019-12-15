@@ -1,6 +1,9 @@
 package com.grapeup.hotelreservation.model;
 
 
+import com.grapeup.hotelreservation.exception.AvailableRoomNotFoundException;
+import com.grapeup.hotelreservation.exception.IncorrectNumberOfPeopleException;
+
 import java.util.Arrays;
 
 public enum RoomType {
@@ -20,12 +23,12 @@ public enum RoomType {
 
     public static RoomType getFittingSize(int size) {
         if (size < 1) {
-            throw new IllegalArgumentException("Room size can't be less than 1.");
+            throw new IncorrectNumberOfPeopleException("Room size can't be less than 1.");
         }
         return Arrays.stream(RoomType.values())
                 .filter(roomType -> roomType.capacity >= size)
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(
+                .orElseThrow(() -> new IncorrectNumberOfPeopleException(
                         String.format("Room size %d don't fit. Maximum "
                                 + "possible size is %d.", size, PENTHOUSE.capacity)));
     }
