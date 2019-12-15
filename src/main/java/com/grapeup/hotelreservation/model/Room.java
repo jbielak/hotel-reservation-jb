@@ -36,7 +36,7 @@ public class Room {
     private RoomType roomType;
 
     @OneToMany(cascade = CascadeType.ALL,
-            fetch = FetchType.EAGER,
+            fetch = FetchType.LAZY,
             mappedBy = "room")
     private Set<Reservation> reservations;
 }
