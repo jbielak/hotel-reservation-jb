@@ -44,10 +44,6 @@ public class HotelReservationIntegrationTest {
     @Autowired
     private DataSource dataSource;
 
-    /*public ConnectionHolder getConnectionHolder() {
-        return () -> dataSource.getConnection();
-    }*/
-
     @Test
     @DisplayName("GET /reservations - Success")
     public void shouldReturnAllReservations() throws Exception {
